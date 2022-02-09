@@ -35,7 +35,7 @@ jobs:
         run: python x.py build --all --verbose
       - name: Set Prusti cache path and key
         run: |
-          echo "PRUSTI_CACHE_PATH='${{ env.GITHUB_WORKSPACE }}/prusti_cache.json'" >> $GITHUB_ENV
+          echo "PRUSTI_CACHE_PATH='$GITHUB_WORKSPACE/prusti_cache.json'" >> $GITHUB_ENV
           echo "YEAR=$(date +%Y)" >> $GITHUB_ENV
       - name: Persist Prusti cache
         uses: actions/cache@v2
