@@ -15,6 +15,8 @@ jobs:
   # The goal here is to fail fast and give quick feedback to the developers.
   quick-tests:
     runs-on: ubuntu-latest
+    env:
+      PRUSTI_CACHE_PATH: ${{ github.workspace }}/prusti_cache.bin
     # Only run when triggered by a pull request event
     if: github.event_name == 'pull_request'
     steps:
@@ -35,7 +37,6 @@ jobs:
         run: python x.py build --all --verbose
       - name: Set Prusti cache path and key
         run: |
-          echo "PRUSTI_CACHE_PATH='$GITHUB_WORKSPACE/prusti_cache.bin'" >> $GITHUB_ENV
           echo "YEAR=$(date +%Y)" >> $GITHUB_ENV
       - name: Persist Prusti cache
         uses: actions/cache@v2
@@ -150,6 +151,8 @@ jobs:
         os: [ ubuntu-latest, windows-latest, macos-latest ]
       fail-fast: false
     runs-on: ${{ matrix.os }}
+    env:
+      PRUSTI_CACHE_PATH: ${{ github.workspace }}/prusti_cache.bin
     steps:
       - name: Check out the repo
         uses: actions/checkout@v2
@@ -168,13 +171,12 @@ jobs:
         run: python x.py build --all --verbose
       - name: Set Prusti cache path and key
         run: |
-          echo "PRUSTI_CACHE_PATH='$GITHUB_WORKSPACE/prusti_cache.bin'" >> $GITHUB_ENV
           echo "YEAR=$(date +%Y)" >> $GITHUB_ENV
       - name: Persist Prusti cache
         uses: actions/cache@v2
         with:
           path: ${{ env.PRUSTI_CACHE_PATH }}
-          key: prusti-cache-${{ env.YEAR }}
+          key: prusti-cache-${{ matrix.os }}-${{ env.YEAR }}
       - name: Run cargo tests
         run: python x.py test --all --verbose
       - name: Check prusti-contracts
