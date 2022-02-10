@@ -35,7 +35,7 @@ jobs:
         run: python x.py build --all --verbose
       - name: Set Prusti cache path and key
         run: |
-          echo "PRUSTI_CACHE_PATH='$GITHUB_WORKSPACE/prusti_cache.json'" >> $GITHUB_ENV
+          echo "PRUSTI_CACHE_PATH='$GITHUB_WORKSPACE/prusti_cache.bin'" >> $GITHUB_ENV
           echo "YEAR=$(date +%Y)" >> $GITHUB_ENV
       - name: Persist Prusti cache
         uses: actions/cache@v2
@@ -166,6 +166,15 @@ jobs:
         uses: Swatinem/rust-cache@v1.3.0
       - name: Build with cargo
         run: python x.py build --all --verbose
+      - name: Set Prusti cache path and key
+        run: |
+          echo "PRUSTI_CACHE_PATH='$GITHUB_WORKSPACE/prusti_cache.bin'" >> $GITHUB_ENV
+          echo "YEAR=$(date +%Y)" >> $GITHUB_ENV
+      - name: Persist Prusti cache
+        uses: actions/cache@v2
+        with:
+          path: ${{ env.PRUSTI_CACHE_PATH }}
+          key: prusti-cache-${{ env.YEAR }}
       - name: Run cargo tests
         run: python x.py test --all --verbose
       - name: Check prusti-contracts
