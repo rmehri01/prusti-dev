@@ -760,11 +760,11 @@ impl<'p, 'v: 'p, 'tcx: 'v> BackwardMirInterpreter<'tcx>
                 destination,
                 func:
                     mir::Operand::Constant(box mir::Constant {
-                        literal: mir::ConstantKind::Ty(ty::Const(ty_val)),
+                        literal,
                         ..
                     }),
                 ..
-            } => self.apply_call_terminator(args, destination, ty_val.ty, states, span)?,
+            } => self.apply_call_terminator(args, destination, literal.ty(), states, span)?,
 
             TerminatorKind::Call { .. } => {
                 return Err(SpannedEncodingError::unsupported(
