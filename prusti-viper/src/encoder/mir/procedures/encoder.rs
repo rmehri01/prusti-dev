@@ -440,11 +440,7 @@ impl<'p, 'v: 'p, 'tcx: 'v> ProcedureEncoder<'p, 'v, 'tcx> {
             //     }
             // }
             TerminatorKind::Call {
-                func:
-                    mir::Operand::Constant(box mir::Constant {
-                        literal,
-                        ..
-                    }),
+                func: mir::Operand::Constant(box mir::Constant { literal, .. }),
                 args,
                 destination,
                 cleanup,

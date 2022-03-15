@@ -758,11 +758,7 @@ impl<'p, 'v: 'p, 'tcx: 'v> BackwardMirInterpreter<'tcx>
             TerminatorKind::Call {
                 args,
                 destination,
-                func:
-                    mir::Operand::Constant(box mir::Constant {
-                        literal,
-                        ..
-                    }),
+                func: mir::Operand::Constant(box mir::Constant { literal, .. }),
                 ..
             } => self.apply_call_terminator(args, destination, literal.ty(), states, span)?,
 
