@@ -420,6 +420,7 @@ impl<'p, 'v: 'p, 'tcx: 'v> ProcedureEncoder<'p, 'v, 'tcx> {
 
         // Fix variable declarations.
         let method_with_fold_unfold = fix_ghost_vars(method_with_fold_unfold);
+        let method_with_fold_unfold = fix_assert_positions(self.encoder, method_with_fold_unfold);
 
         // Dump final CFG
         if config::dump_debug_info() {
@@ -6511,6 +6512,55 @@ impl<'p, 'v: 'p, 'tcx: 'v> ProcedureEncoder<'p, 'v, 'tcx> {
     fn register_error<T: Into<MultiSpan>>(&self, span: T, error_ctxt: ErrorCtxt) -> vir::Position {
         self.mir_encoder.register_error(span, error_ctxt)
     }
+
+}
+
+fn fix_assert_positions<'v, 'tcx>(
+    encoder: &Encoder<'v, 'tcx>,
+    mut method: vir::CfgMethod,
+) -> vir::CfgMethod {
+    struct ErrorContextReplacer<'a, 'tcx> {
+        default_pos: vir::Position,
+        error_ctxt: ErrorCtxt,
+        error_manager: &'a mut crate::encoder::errors::ErrorManager<'tcx>,
+    }
+    impl<'a, 'tcx> vir::StmtFolder for ErrorContextReplacer<'a, 'tcx> {
+        fn fold_expr(&mut self, expr: vir::Expr) -> vir::Expr {
+            vir::ExprFolder::fold(self, expr)
+        }
+    }
+    impl<'a, 'tcx> vir::ExprFolder for ErrorContextReplacer<'a, 'tcx> {
+        fn fold(&mut self, e: Expr) -> Expr {
+            let expr = vir::default_fold_expr(self, e);
+            let pos = expr.pos();
+            if pos.is_default() {
+                expr.set_default_pos(self.default_pos)
+            } else {
+                let new_pos = self.error_manager.duplicate_position(pos);
+                self.error_manager.set_error(new_pos, self.error_ctxt.clone());
+                expr.set_pos(new_pos)
+            }
+        }
+    }
+    let mut sentinel_stmt = vir::Stmt::comment("moved out stmt");
+    for block in &mut method.basic_blocks {
+        for stmt in &mut block.stmts {
+            std::mem::swap(&mut sentinel_stmt, stmt);
+            if let Some(pos) = sentinel_stmt.pos() {
+                let mut error_manager = encoder.error_manager();
+                if let Some(error_ctxt) = error_manager.get_error_ctxt(*pos) {
+                    let mut replacer = ErrorContextReplacer {
+                        error_ctxt: error_ctxt.clone(),
+                        default_pos: *pos,
+                        error_manager: &mut error_manager,
+                    };
+                    sentinel_stmt = vir::StmtFolder::fold(&mut replacer, sentinel_stmt);
+                }
+            }
+            std::mem::swap(&mut sentinel_stmt, stmt);
+        }
+    }
+    method
 }
 
 /// Whether to encode a shared or mutable array access

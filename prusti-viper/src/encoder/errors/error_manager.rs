@@ -168,6 +168,10 @@ impl<'tcx> ErrorManager<'tcx> {
         pos
     }
 
+    pub fn get_error_ctxt(&self, pos: Position) -> Option<&ErrorCtxt> {
+        self.error_contexts.get(&pos.id())
+    }
+
     pub fn get_def_id(&self, ver_error: &VerificationError) -> Option<ProcedureDefId> {
         ver_error.pos_id.as_ref()
             .and_then(|id| id.parse().ok())

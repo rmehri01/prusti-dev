@@ -491,6 +491,7 @@ impl Stmt {
         match self {
             Stmt::PackageMagicWand(PackageMagicWand { position, .. }) => Some(position),
             Stmt::Exhale(Exhale { position, .. }) => Some(position),
+            Stmt::Assert(Assert { position, .. }) => Some(position),
             _ => None,
         }
     }
