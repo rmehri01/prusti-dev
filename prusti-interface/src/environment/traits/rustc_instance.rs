@@ -11,7 +11,7 @@
 //   span bugs, which is the main motivation for duplication.
 
 use rustc_errors::ErrorGuaranteed;
-use rustc_hir::def_id::{DefId, LocalDefId};
+use rustc_hir::def_id::{DefId};
 use rustc_infer::infer::TyCtxtInferExt;
 use rustc_middle::ty::subst::SubstsRef;
 use rustc_middle::ty::{self, Binder, Instance, Ty, TyCtxt, TypeFoldable, TypeVisitor};
