@@ -142,7 +142,9 @@ impl<'v> ToViper<'v, viper::Stmt<'v>> for Stmt {
                 assert!(!pos.is_default(), "stmt with default pos: {}", self);
                 ast.exhale(expr.to_viper(ast), pos.to_viper(ast))
             }
-            Stmt::Assert(ref expr, ref pos) => ast.assert(expr.to_viper(ast), pos.to_viper(ast)),
+            Stmt::Assert(ref expr, ref pos) => {
+                let expr = expr.clone().set_default_pos(*pos);
+                ast.assert(expr.to_viper(ast), pos.to_viper(ast))},
             Stmt::MethodCall(ref method_name, ref args, ref targets) => {
                 let fake_position = Position::default();
                 ast.method_call(
