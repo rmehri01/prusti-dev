@@ -2020,15 +2020,13 @@ impl<'p, 'v: 'p, 'tcx: 'v> ProcedureEncoder<'p, 'v, 'tcx> {
                 ref destination,
                 func:
                     mir::Operand::Constant(box mir::Constant {
-                        literal: mir::ConstantKind::Ty(
-                            ty::Const(func_ty_val),
-                        ),
+                        literal,
                         ..
                     }),
                 ..
             } => {
-                let ty = &func_ty_val.ty;
-                let func_const_val = &func_ty_val.val;
+                let ty = literal.ty();
+                let func_const_val = literal.try_to_value();
                 if let ty::TyKind::FnDef(def_id, substs) = ty.kind() {
                     debug!("Encode function call {:?} with substs {:?}", def_id, substs);
 
